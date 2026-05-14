@@ -1,0 +1,64 @@
+# Build output
+[Bb]in/
+[Oo]bj/
+[Dd]ebug/
+[Rr]elease/
+out/
+publish/
+artifacts/
+
+# .NET user-specific files
+*.user
+*.rsuser
+*.suo
+*.userosscache
+*.sln.docstates
+*.VC.db
+*.VC.VC.opendb
+
+# Rider / JetBrains
+.idea/
+*.sln.iml
+
+# VS Code workspace settings
+.vscode/
+!.vscode/extensions.json
+
+# Visual Studio workspace cache
+.vs/
+
+# NuGet
+*.nupkg
+*.snupkg
+*.nuget.props
+*.nuget.targets
+.nuget/
+packages/
+
+# Tooling / test output
+TestResults/
+coverage/
+*.coverage
+*.coveragexml
+
+# Logs
+*.log
+logs/
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Secrets and local overrides
+secrets.json
+appsettings.*.local.json
+.env
+.env.*
+
+# Blazor / front-end caches
+wwwroot/_framework/scoped.styles/
+wwwroot/_framework/*.map
+
+# Copilot/chat artifacts
+.github/copilot-workspace/

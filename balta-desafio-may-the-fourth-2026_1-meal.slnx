@@ -1,0 +1,15 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/OneMeal.Ai/OneMeal.Ai.csproj" />
+    <Project Path="src/OneMeal.Api/OneMeal.Api.csproj" />
+    <Project Path="src/OneMeal.Application/OneMeal.Application.csproj" />
+    <Project Path="src/OneMeal.Core/OneMeal.Core.csproj" />
+    <Project Path="src/OneMeal.Infra/OneMeal.Infra.csproj" />
+    <Project Path="src/OneMeal.Web/OneMeal.Web.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/OneMeal.ArchitectureTests/OneMeal.ArchitectureTests.csproj" />
+    <Project Path="tests/OneMeal.IntegrationTests/OneMeal.IntegrationTests.csproj" />
+    <Project Path="tests/OneMeal.UnitTests/OneMeal.UnitTests.csproj" />
+  </Folder>
+</Solution>

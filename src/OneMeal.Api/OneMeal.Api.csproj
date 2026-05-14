@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\OneMeal.Ai\OneMeal.Ai.csproj" />
+    <ProjectReference Include="..\OneMeal.Application\OneMeal.Application.csproj" />
+    <ProjectReference Include="..\OneMeal.Core\OneMeal.Core.csproj" />
+    <ProjectReference Include="..\OneMeal.Infra\OneMeal.Infra.csproj" />
+  </ItemGroup>
+
+</Project>

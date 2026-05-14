@@ -1,0 +1,208 @@
+﻿@page "/"
+@inject OneMeal.Web.Services.MealSuggestionApiClient ApiClient
+
+<PageTitle>OneMeal Mission Control</PageTitle>
+
+<section class="mission-grid">
+	<section class="tech-panel command-panel">
+		<p class="panel-label">MISSION INPUT</p>
+		<h1>Planeje uma refeicao dentro da sua janela orbital.</h1>
+		<p class="panel-copy">Cruze ingredientes disponiveis, objetivo nutricional e o espaco entre compromissos para receber uma sugestao imediatamente executavel.</p>
+
+		<EditForm EditContext="editContext" OnSubmit="SuggestAsync" class="mission-form">
+			<DataAnnotationsValidator />
+
+			<label>
+				<span>Ingredientes a bordo</span>
+				<InputTextArea @bind-Value="mission.Ingredients" class="terminal-input terminal-textarea" />
+			</label>
+
+			<div class="grid-two">
+				<label>
+					<span>Tempo livre</span>
+					<InputNumber @bind-Value="mission.AvailableMinutes" class="terminal-input" />
+				</label>
+
+				<label>
+					<span>Objetivo</span>
+					<InputText @bind-Value="mission.Goal" class="terminal-input" />
+				</label>
+			</div>
+
+			<div class="grid-two">
+				<label>
+					<span>Perfil alimentar</span>
+					<InputText @bind-Value="mission.DietaryPreference" class="terminal-input" />
+				</label>
+
+				<label>
+					<span>Contexto da agenda</span>
+					<InputText @bind-Value="mission.AgendaContext" class="terminal-input" />
+				</label>
+			</div>
+
+			<ValidationSummary class="validation-list" />
+
+			<button class="tech-button" type="submit" disabled="@isLoading">@ButtonText</button>
+		</EditForm>
+	</section>
+
+	<section class="status-column">
+		<section class="tech-panel hud-panel">
+			<p class="panel-label">STATUS</p>
+			<div class="status-strip">
+				<span class="status-badge status-badge-green">AI READY</span>
+				<span class="status-badge">FALLBACK SAFE</span>
+				<span class="status-badge">NET 10</span>
+			</div>
+			<div class="segmented-meter" aria-label="Mission readiness">
+				@for (var index = 0; index < 10; index++)
+				{
+					<span class="@(index < 8 ? "segment is-active" : "segment")"></span>
+				}
+			</div>
+		</section>
+
+		<section class="tech-panel recipe-panel">
+			<p class="panel-label">SUGESTAO</p>
+
+			@if (!string.IsNullOrWhiteSpace(errorMessage))
+			{
+				<p class="error-callout">@errorMessage</p>
+			}
+			else if (hasSubmitted && result is null)
+			{
+				<div class="recipe-placeholder">
+					<h2>Aguarde.</h2>
+				</div>
+			}
+			else if (result is null)
+			{
+				<div class="recipe-placeholder">
+					<h2>Aguardando telemetria</h2>
+					<p>Use ovos, frango, arroz, tomate ou o que tiver em maos e execute uma primeira consulta.</p>
+				</div>
+			}
+			else
+			{
+				<article class="recipe-card">
+					<div class="recipe-card-header">
+						<span class="status-badge @(result.UsedFallback ? string.Empty : "status-badge-green")">@(result.UsedFallback ? "SAFE FALLBACK" : "AI COMPOSED")</span>
+						<span class="recipe-badge">@result.Badge</span>
+					</div>
+
+					<h2>@result.RecipeName</h2>
+					<p class="recipe-copy">@result.Justification</p>
+
+					<dl class="metric-grid">
+						<div>
+							<dt>Tempo</dt>
+							<dd>@result.TotalMinutes min</dd>
+						</div>
+						<div>
+							<dt>Perfil</dt>
+							<dd>@result.DietaryProfile</dd>
+						</div>
+						<div>
+							<dt>Calorias</dt>
+							<dd>@result.Nutrition.Calories kcal</dd>
+						</div>
+						<div>
+							<dt>Proteina</dt>
+							<dd>@result.Nutrition.ProteinGrams g</dd>
+						</div>
+					</dl>
+
+					<div class="list-grid">
+						<section>
+							<p class="mini-label">Usando agora</p>
+							<ul>
+								@foreach (var ingredient in result.UsedIngredients)
+								{
+									<li>@ingredient</li>
+								}
+							</ul>
+						</section>
+
+						<section>
+							<p class="mini-label">Faltando</p>
+							<ul>
+								@foreach (var ingredient in result.MissingIngredients)
+								{
+									<li>@ingredient</li>
+								}
+							</ul>
+						</section>
+					</div>
+
+					<section>
+						<p class="mini-label">Procedimento</p>
+						<ol class="steps-list">
+							@foreach (var step in result.Steps)
+							{
+								<li>@step</li>
+							}
+						</ol>
+					</section>
+				</article>
+			}
+		</section>
+	</section>
+</section>
+
+@code {
+	private readonly MissionFormModel mission = new()
+	{
+		Ingredients = "ovos, espinafre, queijo, azeite",
+	};
+	private EditContext? editContext;
+
+	private MealSuggestionResponse? result;
+	private string? errorMessage;
+	private bool isLoading;
+	private bool hasSubmitted;
+
+	private string ButtonText => isLoading ? "SCANNING..." : "EXECUTAR SUGESTAO";
+
+	protected override void OnInitialized()
+	{
+		editContext = new EditContext(mission);
+	}
+
+	private async Task SuggestAsync(EditContext context)
+	{
+		hasSubmitted = true;
+
+		if (!context.Validate())
+		{
+			result = null;
+			errorMessage = "Formulario invalido. Revise os campos obrigatorios e o tempo livre entre 5 e 180 minutos.";
+			return;
+		}
+
+		errorMessage = null;
+		isLoading = true;
+
+		try
+		{
+			var response = await ApiClient.SuggestAsync(mission);
+			if (response is null)
+			{
+				result = null;
+				errorMessage = $"A API em {ApiClient.ApiBaseUrl} respondeu sem conteudo. Verifique se o endpoint /api/meal-suggestions retorna JSON valido.";
+				return;
+			}
+
+			result = response;
+		}
+		catch (Exception)
+		{
+			result = null;
+			errorMessage = $"Nao foi possivel consultar a API em {ApiClient.ApiBaseUrl}. Inicie o backend OneMeal.Api nesse endpoint ou ajuste Api:BaseUrl no appsettings do Web.";
+		}
+		finally
+		{
+			isLoading = false;
+		}
+	}
+}
